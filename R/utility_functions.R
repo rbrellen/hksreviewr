@@ -1,28 +1,38 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Build and Reload Package:  'Cmd + Shift + B'
-#   Check Package:             'Cmd + Shift + E'
-#   Test Package:              'Cmd + Shift + T'
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
 
-# Import PDF with each line as element in a list object
+#' Import Lines
+#'
+#' @param input_file A PDF file location to be scraped and converted.
+#'
+#' @return List object with each element representing a line of the source PDF.
+#'
+#' @examples
+#' \dontrun{
+#' lines <- import_lines('~/courses/API-101B.pdf')
+#' }
 import_lines <- function(input_file) {
-  read <- readPDF(control = list(text = "-layout"))
-  document <- Corpus(URISource(input_file), readerControl = list(reader = read))
-  doc <- content(document[[1]])
-  lines <- doc %>% stringr::str_split('\n') %>% .[[1]]
+  read <- tm::readPDF(control = list(text = "-layout"))
+  document <- tm::Corpus(URISource(input_file), readerControl = list(reader = read))
+  doc <- NLP::content(document[[1]])
+  lines <- doc %>%
+    stringr::str_split('\n') %>%
+    .[[1]]
   lines
 }
 
-# Question Numbers
+#' Get Line Number
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#' @param question_number The question number (1-19) to be identified.
+#'
+#' @return A number representing the list element in which the question is found.
+#'
+#' @examples
+#' \dontrun{
+#' line_number <- get_line_number(lines, 01)
+#' }
 get_line_number <- function(lines = lines, question_number) {
   question_number <- as.character(question_number)
   pattern <- paste0('^\\s+', question_number, '\\.')
@@ -30,26 +40,68 @@ get_line_number <- function(lines = lines, question_number) {
   result
 }
 
-# Course number
+#' Get Course Number
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return A seven- or eight-character course identifier.
+#'
+#' @examples
+#' \dontrun{
+#' course_number <- get_course_number(lines)
+#' }
 get_course_number <- function(lines) {
-  result <- stringr::str_extract(lines[1], '^[A-z]+-[0-9]+[A-z]{0,1}')
+  result <- lines[1] %>%
+    stringr::str_extract('^[A-z]+-[0-9]+[A-z]{0,1}')
   result
 }
 
-# Semester
+#' Get Semester
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return The semester and year in which the course was taught.
+#'
+#' @examples
+#' \dontrun{
+#' semester <- get_semester(lines)
+#' }
 get_semester <- function(lines) {
-  result <- stringr::str_extract(lines[1], '(Fall|Spring|January) [0-9]{4}$') %>%
+  result <- lines[1] %>%
+    stringr::str_extract('(Fall|Spring|January) [0-9]{4}$') %>%
     stringr::str_replace('January', 'J-Term')
   result
 }
 
-# Year
+#' Get Year
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return The year in which the course was taught.
+#'
+#' @examples
+#' \dontrun{
+#' year <- get_year(lines)
+#' }
 get_year <- function(lines) {
-  result <- stringr::str_extract(lines[1], '[0-9]{4}$')
+  result <- lines[1] %>%
+    stringr::str_extract('[0-9]{4}$') %>%
+    as.integer()
   result
 }
 
-# Faculty name
+#' Get Faculty Name
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return The name of the faculty member(s) teaching the course. If multiple
+#'     faculty members teach the course, their names will be separated with a
+#'     backslash.
+#'
+#' @examples
+#' \dontrun{
+#' faculty_name <- get_faculty_name(lines)
+#' }
 get_faculty_name <- function(lines) {
   row_number <- grep('Faculty Overall', lines)
   result <- lines[row_number] %>%
@@ -60,7 +112,17 @@ get_faculty_name <- function(lines) {
   result
 }
 
-# Questions
+#' Get Question
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#' @param question_number The question number (1-19) for which a mean response is desired.
+#'
+#' @return The mean response from all respondents for the specified question.
+#'
+#' @examples
+#' \dontrun{
+#' question_01 <- get_question(lines, 01)
+#' }
 get_question <- function(lines = lines, question_number) {
   line_number <- get_line_number(lines, question_number)
   result <- lines[line_number] %>%
@@ -69,7 +131,16 @@ get_question <- function(lines = lines, question_number) {
   result
 }
 
-# Respondents
+#' Get Respondents
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return The number of respondents (HKS plus non-HKS) who submitted a course evaluation.
+#'
+#' @examples
+#' \dontrun{
+#' respondents <- get_respondents(lines)
+#' }
 get_respondents <- function(lines) {
   hks_line <- grep('\\s{2}[A-Z]{3}\\sSTUDENTS', lines)
   non_hks_line <- grep('\\sNON-[A-Z]{3}\\sSTUDENTS', lines)
@@ -85,6 +156,16 @@ get_respondents <- function(lines) {
   result
 }
 
+#' Get Evaluation Format
+#'
+#' @param lines Input file represented as list object (output of `import_lines`).
+#'
+#' @return Designation as "Old" or "New" depending on semester and year
+#'
+#' @examples
+#' \dontrun{
+#' eval_format <- get_eval_format(lines)
+#' }
 get_eval_format <- function(lines) {
   semester <- get_semester(lines)
   year <- get_year(lines)
@@ -92,6 +173,16 @@ get_eval_format <- function(lines) {
   result
 }
 
+#' Create Row
+#'
+#' @param input_file A PDF file location to be scraped and converted.
+#'
+#' @return A data frame representing structured data for the input file.
+#'
+#' @examples
+#' \dontrun{
+#' row <- create_row('~/courses/API-101B.pdf')
+#' }
 create_row <- function(input_file) {
   lines <- import_lines(input_file)
   eval_format <- get_eval_format(lines)
@@ -155,15 +246,5 @@ create_row <- function(input_file) {
   result <- result %>%
     dplyr::mutate_at(vars(c(course_number, faculty_name, semester, eval_format)),
                      funs(as.character))
-  result
-}
-
-create_output <- function(list_of_input_files) {
-  result <- dplyr::bind_rows(lapply(list_of_input_files, create_row)) %>%
-    purrr::set_names(c("Course Number", "Faculty Name(s)", "Semester",
-                       "Respondents", "Q01", "Q02*", "Q03", "Q04", "Q05",
-                       "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12*",
-                       "Q13*", "Q14*", "Q15*", "Q16*", "Q17*", "Q18*",
-                       "Q19", "Evaluation Format (New = 2016-2017 onward)"))
   result
 }

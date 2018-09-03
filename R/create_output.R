@@ -1,6 +1,6 @@
 #' Create Output
 #'
-#' @param input_directories A list of PDF file locations to be scraped and converted.
+#' @param target_directories A list of PDF file locations to be scraped and converted.
 #'
 #' @return A data frame representing structured data for the list of input files.
 #' @export
@@ -9,8 +9,8 @@
 #' \dontrun{
 #' course_ratings <- create_output('~/courses/')
 #' }
-create_output <- function(input_directory) {
-  list_of_input_files <- paste0(input_directory, list.files(input_directory))
+create_output <- function(target_directories) {
+  list_of_input_files <- get_file_paths(target_directories)
 
   result <- dplyr::bind_rows(lapply(list_of_input_files, create_row)) %>%
     purrr::set_names(c("Course Number", "Faculty Name(s)", "Semester",

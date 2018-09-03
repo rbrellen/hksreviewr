@@ -244,7 +244,7 @@ create_row <- function(input_file) {
   }
 
   result <- result %>%
-    dplyr::mutate_at(vars(c(course_number, faculty_name, semester, eval_format)),
-                     funs(as.character))
+    dplyr::mutate_at(dplyr::vars(c(course_number, faculty_name, semester, eval_format)),
+                     dplyr::funs(as.character))
   result
 }

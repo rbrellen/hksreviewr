@@ -1,0 +1,14 @@
+Type: Package
+Package: hksreviewr
+Title: Scrape HKS Course Evaluation PDFs
+Version: 0.1.0
+Author: Ryan Brellenthin
+Maintainer: Ryan Brellenthin
+    <ryan_brellenthin@student.hks.harvard.edu>
+Description: This package contains functions to create a
+    data frame from HKS course evaluations in PDF format.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/rbrellen/hksreviewr
+BugReports: https://github.com/rbrellen/hksreviewr/issues

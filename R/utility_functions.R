@@ -248,3 +248,21 @@ create_row <- function(input_file) {
                      dplyr::funs(as.character))
   result
 }
+
+#' Get File Paths
+#'
+#' @param list_of_directories Single directory or list/vector of target directories.
+#'
+#' @return Vector containing full path to each file in each target directory regardless of working directory.
+#'
+#' @examples
+#' \dontrun{
+#' desktop <- get_file_paths('~/Desktop')
+#' }
+#' \dontrun{
+#' desktop_plus <- get_file_paths(c('~/', '~/Desktop'))
+#' }
+get_file_paths <- function(list_of_directories) {
+  results <- unlist(lapply(list_of_directories, function(x) paste0(x, list.files(x))))
+  results
+}

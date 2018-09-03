@@ -12,3 +12,14 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/rbrellen/hksreviewr
 BugReports: https://github.com/rbrellen/hksreviewr/issues
+Imports: 
+    stringr,
+    dplyr,
+    roxygen2,
+    tm,
+    pdftools,
+    NLP,
+    purrr,
+    magrittr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.0
